@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/alert_dialog_container_ly"
+        android:layout_width="270dip"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:background="@drawable/permission_dialog_bg">
+
+        <FrameLayout
+            android:id="@+id/topPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="25dip"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/alertTitle"
+                android:layout_marginTop="18dip"
+                android:layout_marginBottom="8dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
+                android:layout_gravity="center_horizontal"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:textSize="17sp"
+                android:textColor="#333333"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="This is Title" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/contentPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="32dip"
+                android:layout_marginRight="32dip"
+                android:layout_marginBottom="18dp"
+                android:gravity="center_horizontal|top"
+                android:textColor="#666666"
+                android:textSize="13sp"/>
+
+        </FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#e4e4e4"/>
+
+        <FrameLayout
+            android:id="@+id/buttonPanel"
+            android:layout_width="match_parent"
+            android:layout_height="44dip"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/action"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:background="@drawable/permission_dialog_action_btn_bg"
+                android:drawablePadding="8dip"
+                android:textSize="17sp"
+                android:textColor="#057eff"
+                android:singleLine="true"
+                android:visibility="gone"
+                style="?android:attr/borderlessButtonStyle"
+                tools:text="Action" />
+
+            <LinearLayout
+                android:id="@+id/button_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/negative"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/permission_dialog_negative_btn_bg"
+                    android:drawablePadding="8dip"
+                    android:textSize="17sp"
+                    android:textColor="#057eff"
+                    android:singleLine="true"
+                    style="?android:attr/borderlessButtonStyle"
+                    tools:text="Negative" />
+
+                <View
+                    android:id="@+id/left_middle_divider"
+                    android:layout_width="0.25dip"
+                    android:layout_height="match_parent"
+                    android:background="#e4e4e4" />
+
+                <Button
+                    android:id="@+id/positive"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/permission_dialog_positive_btn_bg"
+                    android:drawablePadding="8dip"
+                    android:singleLine="true"
+                    android:textSize="17sp"
+                    android:textColor="#057eff"
+                    style="?android:attr/borderlessButtonStyle"
+                    tools:text="Positive" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>
