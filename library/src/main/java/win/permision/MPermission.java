@@ -1,17 +1,25 @@
 package win.permision;
 
 import android.app.Activity;
+import android.app.AppOpsManager;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
+import android.os.Looper;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 
 /**
@@ -19,7 +27,7 @@ import android.util.Log;
  * created on: 2019-07-13
  */
 public class MPermission {
-    public static final String TAG = "MPermission";
+    private static final String TAG = "MPermission";
 
     /**
      * 动态权限申请方法
@@ -28,18 +36,25 @@ public class MPermission {
         if (isOverMarshmallow()) {
             verifyObject(request.getContext());
 
-            FragmentActivity activity = getActivity(request.getContext());
-            FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            MPermissionFragment mPermissionFragment = (MPermissionFragment) fragmentManager.findFragmentByTag(MPermissionFragment.TAG);
+            if (Looper.getMainLooper() == Looper.myLooper()) {
+                FragmentActivity activity = getActivity(request.getContext());
+                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                MPermissionFragment mPermissionFragment = (MPermissionFragment) fragmentManager.findFragmentByTag(MPermissionFragment.TAG);
 
-            if (mPermissionFragment == null) {
-                mPermissionFragment = new MPermissionFragment();
-                fragmentManager.beginTransaction()
-                        .add(mPermissionFragment, MPermissionFragment.TAG)
-                        .commitAllowingStateLoss();
-                fragmentManager.executePendingTransactions();
+                if (mPermissionFragment == null) {
+                    mPermissionFragment = new MPermissionFragment();
+                    fragmentManager.beginTransaction()
+                            .add(mPermissionFragment, MPermissionFragment.TAG)
+                            .commitAllowingStateLoss();
+                    fragmentManager.executePendingTransactions();
+                }
+                mPermissionFragment.requestPermission(request.getPermissions(), request.getCallback());
+            } else {
+                if (request.getCallback() != null) {
+                    request.getCallback().onFailed(request.permissionArray());
+                    Log.w(TAG, "请在主线程中申请权限");
+                }
             }
-            mPermissionFragment.requestPermission(request.getPermissions(), request.getCallback());
         } else {
             if (request.getCallback() != null) {
                 request.getCallback().onSucceed(request.permissionArray());
@@ -57,12 +72,6 @@ public class MPermission {
                     return false;
                 }
             }
-        } else {
-            for (String permission: permissions) {
-                if (!MPermissionChecker.checkPermission(context, permission)) {
-                    return false;
-                }
-            }
         }
         return true;
     }
@@ -71,12 +80,10 @@ public class MPermission {
      * 权限检查方法
      * */
     public static boolean checkPermission(@NonNull Context context, @NonNull String permission) {
-        boolean enable;
+        boolean enable = true;
         if (isOverMarshmallow()) {
             int result = context.checkSelfPermission(permission);
             enable = result == PackageManager.PERMISSION_GRANTED;
-        } else {
-            enable = MPermissionChecker.checkPermission(context, permission);
         }
         return enable;
     }
@@ -106,7 +113,56 @@ public class MPermission {
      * 支持查询4.4及以上系统的消息通知权限状态
      * */
     public static boolean isNotificationEnabled(@NonNull Context context) {
-        return MPermissionChecker.checkNotification(context);
+        return checkNotification(context);
+    }
+
+    /**
+     * 消息通知不属于权限范畴，正常来说是不需要检查的。由于项目中需要，该方法属于特殊存在
+     *
+     * 支持查询4.4及以上系统的消息通知权限状态
+     * */
+    private static boolean checkNotification(Context context) {
+
+        try {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                return checkAfterApi24(context);
+            } else {
+                return check(context, "OP_POST_NOTIFICATION");
+            }
+        } catch (Exception e) {
+
+        }
+        return true;
+    }
+
+    private static boolean check(Context context, String permission) throws Exception {
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        ApplicationInfo appInfo = context.getApplicationInfo();
+        String pkg = context.getApplicationContext().getPackageName();
+        int uid = appInfo.uid;
+        Class appOpsClass = Class.forName(AppOpsManager.class.getName());
+        Method checkOpNoThrowMethod = appOpsClass.getMethod("checkOpNoThrow", Integer.TYPE, Integer.TYPE, String.class);
+        Field opPostNotificationValue = appOpsClass.getDeclaredField(permission);
+        int value = (int) opPostNotificationValue.get(Integer.class);
+        int mode = (int) checkOpNoThrowMethod.invoke(appOps, value, uid, pkg);
+
+        return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    private static boolean checkAfterApi24(Context context) {
+        try {
+            NotificationManager mNotificationManager = null;
+            Class<?> c = Class.forName("android.app.NotificationManager");
+            Method method = c.getMethod("getService");
+            Object obj = method.invoke(mNotificationManager);
+            Class<?> clazz = Class.forName("android.app.INotificationManager$Stub$Proxy");
+            Method areNotificationsEnabledForPackage = clazz.getMethod("areNotificationsEnabledForPackage", String.class, int.class);
+            return (boolean) areNotificationsEnabledForPackage.invoke(obj, context.getPackageName(), android.os.Process.myUid());
+        } catch (Exception e) {
+
+        }
+
+        return true;
     }
 
     /**

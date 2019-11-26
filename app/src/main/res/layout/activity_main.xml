@@ -48,4 +48,10 @@
         android:gravity="center"
         android:text="申请多个权限并显示对话框"/>
 
+    <Button
+        android:id="@+id/request_permission_work_thread"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text="子线程申请权限"/>
 </LinearLayout>

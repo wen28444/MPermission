@@ -2,10 +2,11 @@ package permission.sample;
 
 import android.Manifest;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import win.permision.MPermission;
 import win.permision.MPermissionListener;
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         findViewById(R.id.request_permission_show_dialog).setOnClickListener(this);
         findViewById(R.id.request_multi_permission_show_dialog).setOnClickListener(this);
+
+        findViewById(R.id.request_permission_work_thread).setOnClickListener(this);
     }
 
     private void checkSimplePermission() {
@@ -121,6 +124,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MPermission.requestPermission(request);
     }
 
+    private void requestPermissionWorkThread() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                MPermissionRequest request = new MPermissionRequest.Builder()
+                        .with(MainActivity.this)
+                        .addPermission(Manifest.permission.READ_CONTACTS)
+                        .callback(new MPermissionListener() {
+                            @Override
+                            public void onSucceed(@NonNull String[] permissions) {
+
+                            }
+
+                            @Override
+                            public void onFailed(@NonNull String[] permissions) {
+
+                            }
+                        }).build();
+                MPermission.requestPermission(request);
+            }
+        }).start();
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -142,6 +168,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.request_multi_permission_show_dialog:
                 requestMultiPermissionWithDialog();
+                break;
+            case R.id.request_permission_work_thread:
+                requestPermissionWorkThread();
                 break;
             default:
                 break;

@@ -3,11 +3,12 @@ package win.permision;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 /**
  * 自定义权限说明对话框
@@ -17,7 +18,6 @@ import android.widget.TextView;
  */
 class MPermissionDialog extends Dialog {
 
-    private Context mContext;
     private String mTitle;
     private String mMessage;
     private String mPositiveText;
@@ -41,7 +41,6 @@ class MPermissionDialog extends Dialog {
 
     private MPermissionDialog(@NonNull Builder builder) {
         super(builder.mContext);
-        mContext = builder.mContext;
         mTitle = builder.mTitle;
         mMessage = builder.mContent;
         mPositiveText = builder.mPositiveText;
@@ -54,7 +53,6 @@ class MPermissionDialog extends Dialog {
 
     private MPermissionDialog(@NonNull Builder builder, int style) {
         super(builder.mContext, style);
-        mContext = builder.mContext;
         mTitle = builder.mTitle;
         mMessage = builder.mContent;
         mPositiveText = builder.mPositiveText;
