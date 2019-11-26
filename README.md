@@ -128,3 +128,7 @@ MPermission是一个动态权限处理库，实现的功能包括：
 - 当用户拒绝后，可配置是否弹出权限提示框
 
 具体使用查看 demo。
+
+#### 添加依赖
+
+> implementation 'com.github.wen28444:MPermission:v1.1.0'
